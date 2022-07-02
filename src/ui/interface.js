@@ -4,7 +4,6 @@ module.exports = function Interface(options) {
   options.fileSelector = options.fileSelector || "#file-sel";
 
   var urlHash = require('urlhash')();
-  var FileUpload = require('../file-upload');
   var logger = options.logger;
   var Colormaps = require('../color/colormaps');
   var Fullscreen, Presets, Analysis, Colorize, Saving;
@@ -41,9 +40,6 @@ module.exports = function Interface(options) {
     Presets = require('../ui/presets')(options, save_infragrammar_inputs);
     Analysis = require('../ui/analysis')(options, save_infragrammar_inputs);
     Colorize = require('../ui/colorize')(options);
-    Saving = require('../ui/saving')(options);
-
-    if (options.uploadable) FileUpload.initialize({ socket: options.uploadable });
 
     $(options.imageSelector).ready(function() {
 
@@ -76,7 +72,16 @@ module.exports = function Interface(options) {
       $('.choose-prompt').hide();
       $("#save-modal-btn").show();
       $("#save-zone").show();
-      FileUpload.fromFile(this.files, options.processor.updateImage, options.uploadable);
+      let reader = new FileReader();
+      reader.onload = function onReaderLoad(event) {
+        var img;
+        img = new Image();
+        img.onload = function onImageLoad() {
+          options.processor.updateImage(this);
+        };
+        return img.src = event.target.result;
+      };
+      reader.readAsDataURL(this.files[0]);
       $('#preset-modal').modal('show');
       return true;
     });
@@ -104,6 +109,7 @@ module.exports = function Interface(options) {
 
     $("#overlay-btn").click(function() {
       $("#overlay-container").toggle();
+      $("#overlay-controls-container").toggle();
       $("#overlay-btn").toggleClass("btn-success");
     });
 
