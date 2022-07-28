@@ -29,6 +29,7 @@
   <script type="x-shader/x-fragment" id="shader-fs"></script>
   <!-- Global site tag (gtag.js) - Google Analytics -->
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-TC8EC01HKK"></script>
+
   <script>
     window.dataLayer = window.dataLayer || [];
       function gtag(){dataLayer.push(arguments);}
@@ -38,7 +39,8 @@
   </script>
 </head>
 
-<body>
+<body id="drop-zone" ondrop="dropHandler(event);" ondragover="dragOverHandler(event);">
+
   <div id="video-container" style="display:none"></div>
   <div class="container-fluid d-flex flex-column main-container">
     <!-- TODO: change this: -->
@@ -62,19 +64,20 @@
         </div>
 
           <!-- ========================= camera/image/video-controls  ======================== -->
-          <div class="btn-toolbar mediaSelect media-tools" role="toolbar" aria-label="Toolbar with button groups">
-            <div class="btn-group" id="imageselect">
-              <label for="file-sel" tabindex="0">
-                <button onClick="toggleToolbar()"  rel="tooltip" data-bs-placement="left" title="Upload an image" type="button" class="btn-lg btn">
-                  <i class="fa fa-upload"></i>
-                </button>
-                <input type="file" id="file-sel" accept="image/*,video/*" class="visually-hidden" aria-hidden="true" />
-              </label>
-            </div>
-            <div class="btn-group">
-              <button rel="tooltip" title="Connect to an Infragram webcam" id="webcam-activate" type="button" class="btn btn-lg btn-primary"><i class="fa fa-camera-retro"></i></button>
-            </div>
+        <div class="btn-toolbar mediaSelect media-tools" role="toolbar" aria-label="Toolbar with button groups">
+          <div class="btn-group" id="imageselect">
+            <label for="file-sel" tabindex="0">
+              <button onClick="toggleToolbar()"  rel="tooltip" data-bs-placement="left" title="Upload an image" type="button" class="btn-lg btn">
+                <i class="fa fa-upload"></i>
+              </button>
+              <input type="file" id="file-sel" accept="image/*,video/*" class="visually-hidden" aria-hidden="true" />
+            </label>
           </div>
+          <div class="btn-group">
+            <button rel="tooltip" title="Connect to an Infragram webcam" id="webcam-activate" type="button" class="btn btn-lg btn-primary"><i class="fa fa-camera-retro"></i></button>
+          </div>
+        </div>
+
 
         <!-- -----------VIDEO CONTROLS------------------------ -->
         <!-- ============ tools to be moved to canvas upon video upload ?????? ====== -->
@@ -265,7 +268,7 @@
 
         <!-- ========================= intro/welcome msg =============================== -->
         <!-- onClick="$('.choose-prompt').hide();" -->
-        <div class="choose-prompt welcome-msg">
+        <div id="dropZone" class="choose-prompt welcome-msg">
           <div class="welcome-msg-text">
             <h2 style="font-size:1.25rem;">Analyze plant health. <br> Visualize photosynthesis.</h2>
             <p>Every pixel of your infragram media is converted to display the amount of infrared light reflected when used <a href="" style="color:var(--link-color);">with an Infragram camera or filter kit</a>. The default setting generates grey-scale NDVI, the Normalized Difference Vegetation Index, and has a built in colorize function to intensify individual pixel channels.</p>
@@ -275,15 +278,13 @@
           <div class="card text-center sample-images">
             <div class="card-body">
               <p class="card-text" style="font-size:.625rem;"><small>Drop your media here, connect through your computer above <br class="sample-text-effect"> or <br> explore with our ready-to-use images</small></p>
-              <div id="sample-image__select" class="d-flex justify-content-around">
-                <div id="red-filtered-img" class="rfi d-flex flex-column justify-content-center align-items-baseline">
-                  <img class="rfi" src="assets/red-filtered-trees-thumbnail.jpeg" alt="Red filtered image - select to explore the tool." style="width:5rem;height:auto;border:.5rem solild var(--image-container-bg);">
-                  <img id="rfi" class='d-none' src="assets/red-filtered-trees.jpeg" alt="Red filtered image - select to explore the tool."">
-                  <p class="rfi card-text" style="font-size:.625rem;padding-top:.5rem;"><small>Red filtered trees</small></p>
+              <div class="d-flex justify-content-around">
+                <div class="d-flex flex-column justify-content-center align-items-baseline">
+                  <img src="assets/red-filtered-trees-thumbnail.jpeg" alt="Red filtered image - select to explore the tool." style="width:5rem;height:auto;border:.5rem solild var(--image-container-bg);">
+                  <p class="card-text" style="font-size:.625rem;padding-top:.5rem;"><small>Red filtered trees</small></p>
                 </div>
-                <div id="blue-filtered-img" class="d-flex flex-column justify-content-center align-items-center">
+                <div class="d-flex flex-column justify-content-center align-items-center">
                   <img src="assets/blue-filtered-plant-thumbnail.jpeg" alt="Blue filtered image - select to explore the tool." style="width:5rem;height:auto;">
-                  <img id="bfi" class='d-none' src="assets/blue-filtered-plant.jpeg" alt="Blue filtered image - select to explore the tool.">
                   <p class="card-text" style="font-size:.625rem;padding-top:.5rem;"><small>Blue filtered plant</small></p>
                 </div>
               </div>
@@ -533,6 +534,28 @@
           window.location = "https://sequencer.publiclab.org/examples/#steps=ndvi{filter:" + color + "},colormap{colormap:default}&src=" + dataurl;
         }
       })()
+
+      function dropHandler(ev) {
+        ev.preventDefault();
+        if (ev.dataTransfer.items && ev.dataTransfer.items[0].kind === 'file') {
+          // Use DataTransferItemList interface to access the file(s)
+          const file = ev.dataTransfer.items[0].getAsFile();
+          const dataTransfer = new DataTransfer();
+          const fileInput = document.querySelector('input[type="file"]');
+          const fileSelect = document.getElementById('file-sel');
+          var event = new Event('change');
+          dataTransfer.items.add(file);
+          fileInput.files = dataTransfer.files;
+          fileSelect.dispatchEvent(event);
+        }
+      }
+
+      function dragOverHandler(ev) {
+        console.log('File(s) in drop zone');
+
+        // Prevent default behavior (Prevent file from being opened)
+        ev.preventDefault();
+      }
 
   </script>
 </body>
